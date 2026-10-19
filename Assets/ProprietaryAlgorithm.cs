@@ -5,7 +5,11 @@ using UnityEngine.LightTransport;
 
 public class ProprietaryAlgorithm : MonoBehaviour
 {
-    [Header("Generic cityStuff")]
+    [Header("Building Prefabs")]
+    public GameObject buildingPrefab;
+    public List<GameObject> allBuildings = new List<GameObject>();
+
+    [Header("Generic City Stuff")]
     public int cityWidth = 10;
     public int cityLength = 10;
 
@@ -13,11 +17,13 @@ public class ProprietaryAlgorithm : MonoBehaviour
     public int buildingSpacingMax = 5;
     public int minBuildingHeight = 10;
     public int maxBuildingHeight = 50;
-    [Header("Building Prefabs")]
-    public GameObject buildingPrefab;
-    public List<GameObject> allBuildings = new List<GameObject>();
 
-    
+    public int minBuildingWidth = 1;
+    public int maxBuildingWidth = 5;
+    public int minBuildingLength = 1;
+    public int maxBuildingLength = 5;
+
+
 
     void Start()
     {
@@ -67,8 +73,8 @@ public class ProprietaryAlgorithm : MonoBehaviour
         foreach(GameObject building in allBuildings)
         {
             float buildingHeight = Random.Range(minBuildingHeight, maxBuildingHeight + 1);
-            float buildingWidth = Random.Range(1, 5);
-            float buidlingLength = Random.Range(1, 5);
+            float buildingWidth = Random.Range(minBuildingWidth, maxBuildingWidth);
+            float buidlingLength = Random.Range(minBuildingLength, maxBuildingLength);
             Vector3 heightScale = building.transform.localScale;
             heightScale.y = buildingHeight;
             heightScale.x = buildingWidth;
