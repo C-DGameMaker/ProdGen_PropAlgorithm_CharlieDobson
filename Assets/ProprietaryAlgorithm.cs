@@ -1,18 +1,22 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.LightTransport;
 
 public class ProprietaryAlgorithm : MonoBehaviour
 {
+    [Header("Generic cityStuff")]
     public int cityWidth = 10;
     public int cityLength = 10;
 
-    public int buildingSpacing = 5;
+    public int buildingSpacingMin = 1;
+    public int buildingSpacingMax = 5;
     public int minBuildingHeight = 10;
     public int maxBuildingHeight = 50;
     [Header("Building Prefabs")]
     public GameObject buildingPrefab;
     public List<GameObject> allBuildings = new List<GameObject>();
+
     
 
     void Start()
@@ -37,7 +41,8 @@ public class ProprietaryAlgorithm : MonoBehaviour
     {
         DeleteAll();
         RandomPlacements();
-        RandomizeScale();
+        RandomizeBuildingScale();
+        RandomColor();
     }
 
     public void RandomPlacements()
@@ -47,8 +52,8 @@ public class ProprietaryAlgorithm : MonoBehaviour
             for(int z = 0; z < cityLength; z++)
             {
                 GameObject building = Instantiate(buildingPrefab, transform);
-                float posX = x * buildingSpacing;
-                float posZ = z * buildingSpacing;
+                float posX = x * Random.Range(buildingSpacingMin, buildingSpacingMax+1);
+                float posZ = z * Random.Range(buildingSpacingMin, buildingSpacingMax + 1);
 
                 building.transform.localPosition = new Vector3(posX, 0, posZ);
                 allBuildings.Add(building);
@@ -57,7 +62,7 @@ public class ProprietaryAlgorithm : MonoBehaviour
         }
     }
 
-    public void RandomizeScale()
+    public void RandomizeBuildingScale()
     {
         foreach(GameObject building in allBuildings)
         {
@@ -69,6 +74,18 @@ public class ProprietaryAlgorithm : MonoBehaviour
             heightScale.x = buildingWidth;
             heightScale.z = buidlingLength;
             building.transform.localScale = heightScale;
+        }
+    }
+
+    public void RandomColor()
+    {
+        foreach(GameObject building in allBuildings)
+        {
+            Renderer render;
+
+            render = building.GetComponent<Renderer>();
+
+            render.material.color = Random.ColorHSV(0f, 1f, 0.5f, 1f);
         }
     }
 }
