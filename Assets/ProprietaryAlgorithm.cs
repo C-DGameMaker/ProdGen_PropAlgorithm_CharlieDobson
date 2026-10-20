@@ -56,7 +56,7 @@ public class ProprietaryAlgorithm : MonoBehaviour
             for(int z = 0; z < cityLength; z++)
             {
                 GameObject building = Instantiate(buildingPrefab, transform);
-                float posX = x * Random.Range(buildingSpacingMin, buildingSpacingMax+1);
+                float posX = x * Random.Range(buildingSpacingMin, buildingSpacingMax + 1);
                 float posZ = z * Random.Range(buildingSpacingMin, buildingSpacingMax + 1);
                 DistanceBuildings();
 
@@ -84,7 +84,7 @@ public class ProprietaryAlgorithm : MonoBehaviour
         {
             Vector3 heightScale = building.transform.localScale;
             heightScale.y = HeightScale(heightScale.y, heightScale.z);
-            heightScale.x = WidthScale(heightScale.x, heightScale.z);
+            heightScale.x = WidthScale(heightScale.x, heightScale.y);
             heightScale.z = LengthScale(heightScale.z, heightScale.x);
             building.transform.localScale = heightScale;
         }
@@ -95,7 +95,6 @@ public class ProprietaryAlgorithm : MonoBehaviour
         int buildingLength = 0;
 
         float noise = Mathf.PerlinNoise(x * 0.01f, z * 0.01f);
-
         buildingLength = Mathf.Clamp(Mathf.RoundToInt(noise * maxBuildingLength) + Random.Range(minBuildingLength, maxBuildingLength), minBuildingLength, maxBuildingLength);
         return buildingLength;
     }
@@ -116,8 +115,8 @@ public class ProprietaryAlgorithm : MonoBehaviour
         float noise = Mathf.PerlinNoise(h * 0.01f, z * 0.01f);
 
         buildingHeight = Mathf.Clamp(Mathf.RoundToInt(noise * maxBuildingHeight) + Random.Range(minBuildingHeight, maxBuildingHeight), minBuildingHeight, maxBuildingHeight);
-        float centerBias = 1f - (Vector2.Distance(new Vector2(h, z), new Vector2(cityWidth / 2f, cityLength / 2f)) / (cityWidth / 2f));
-        buildingHeight = Mathf.Clamp(Mathf.RoundToInt(buildingHeight * (1f + centerBias * 0.5f)), minBuildingHeight, maxBuildingHeight);
+        //float centerBias = 1f - (Vector2.Distance(new Vector2(h, z), new Vector2(cityWidth / 2f, cityLength / 2f)) / (cityWidth / 2f));
+        //buildingHeight = Mathf.Clamp(Mathf.RoundToInt(buildingHeight * (1f + centerBias * 0.5f)), minBuildingHeight, maxBuildingHeight);
         return buildingHeight;
     }
 
