@@ -23,7 +23,10 @@ public class ProprietaryAlgorithm : MonoBehaviour
     public int maxBuildingWidth = 5;
     public int minBuildingLength = 1;
     public int maxBuildingLength = 5;
-    
+
+    float cityXValue;
+    float cityZValue;
+
 
 
     void Start()
@@ -47,128 +50,58 @@ public class ProprietaryAlgorithm : MonoBehaviour
     public void Regenerate()
     {
         DeleteAll();
-        RandomPlacements();
-        BuildingScales();
-        DetectBuildings();
-        RandomColor();
+        BuildingPlacement();
+        BuildingColor();
     }
 
 
-    public void RandomPlacements()
+    public void BuildingPlacement()
     {
-        for(int x = 0; x < cityWidth; x++)
+        cityXValue = 0f;
+
+        for (int x = 0; x < cityWidth; x++)
         {
-            for(int z = 0; z < cityLength; z++)
+            cityZValue = 0f;
+
+            for (int z = 0; z < cityLength; z++)
             {
                 GameObject building = Instantiate(buildingPrefab, transform);
-                float posX = x * Random.Range(buildingSpacingMin, buildingSpacingMax + 1);
-                float posZ = z * Random.Range(buildingSpacingMin, buildingSpacingMax + 1);
-               
 
-                building.transform.localPosition = new Vector3(posX, 0, posZ);
+                BuildingScales(building);
+                PlacingBuilding(building);
+
                 allBuildings.Add(building);
-                
+
+                cityZValue += maxBuildingLength + Random.Range(buildingSpacingMin, buildingSpacingMax + 1);
             }
+
+            cityXValue += maxBuildingWidth +
+                Random.Range(buildingSpacingMin, buildingSpacingMax + 1);
         }
     }
 
-    public void DetectBuildings()
+    public void PlacingBuilding(GameObject building)
     {
-        List<GameObject> toRemove = new List<GameObject>();
+        float buildingPlacementWidth = Random.Range(minBuildingWidth, maxBuildingWidth + 1);
+        float buildingPlacementLength = Random.Range( minBuildingLength, maxBuildingLength + 1);
 
-        for (int i = 0; i < allBuildings.Count; i++)
-        {
-            if(i != 0)
-            {
-                GameObject buildingToCheck = allBuildings[i];
-                GameObject building = allBuildings[i - 1];
-
-                Vector3[] buildingToCheckVertices = buildingToCheck.GetComponent<MeshFilter>().sharedMesh.vertices;
-                Bounds buildingToCheckBounds = GeometryUtility.CalculateBounds(buildingToCheckVertices, buildingToCheck.transform.localToWorldMatrix);
-
-                Vector3[] buildingVertices = building.GetComponent<MeshFilter>().sharedMesh.vertices;
-                Bounds buildingBounds = GeometryUtility.CalculateBounds(buildingVertices, building.transform.localToWorldMatrix);
-
-                float buildingToCheckMinX = buildingToCheckBounds.min.x;
-                float buildingToCheckMinZ = buildingToCheckBounds.min.z;
-
-                float buildingToCheckMaxX = buildingToCheckBounds.max.x;
-                float buildingToCheckMaxZ = buildingToCheckBounds.max.z;
-
-                float buildingMinX = buildingBounds.min.x;
-                float buildingMinZ = buildingBounds.min.z;
-
-                float buildingMaxX = buildingBounds.max.x;
-                float buildingMaxZ = buildingBounds.max.z;
-
-                // Need to see if its in the box by checking the corners (minx, minz) (maxX, maxZ), 
-
-                if (buildingToCheckMinX <= buildingMaxX) // Min X - Min z, Max Z
-                {
-                    if (buildingToCheckMinZ <= buildingMaxZ)
-                    {
-                        toRemove.Add(buildingToCheck);
-                    }
-                    if (buildingToCheckMaxZ >= buildingMinX)
-                    {
-                        toRemove.Add(buildingToCheck);
-                    }
-                    
-                }
-
-                if (buildingToCheckMaxX >= buildingMinX) // Max X Max z
-                {
-                    if (buildingToCheckMaxZ >= buildingMinX)
-                    {
-                        toRemove.Add(buildingToCheck);
-                    }
-                    if (buildingToCheckMinZ <= buildingMaxZ)
-                    {
-                        toRemove.Add(buildingToCheck);
-                    }
-                }
-
-            }
+        building.transform.localPosition = new Vector3(cityXValue + buildingPlacementWidth / 2f, 0 , cityZValue + buildingPlacementLength / 2f);
+    }
 
 
-        }
+    // scales building based off of a set of rules
+    public void BuildingScales(GameObject building)
+    {
+        Vector3 heightScale = building.transform.localScale;
+        heightScale.y = Random.Range(minBuildingHeight, maxBuildingHeight);
+        heightScale.x = Random.Range(minBuildingWidth, maxBuildingWidth);
+        heightScale.z = Random.Range(minBuildingLength, maxBuildingLength);
+        building.transform.localScale = heightScale;
 
-        foreach(GameObject building in toRemove)
-        {
-            Destroy(building);
-            allBuildings.Remove(building);
-        }
         
     }
 
-
-    // scales all building based off of a set of rules
-    public void BuildingScales()
-    {
-        foreach(GameObject building in allBuildings)
-        {
-            Vector3 heightScale = building.transform.localScale;
-            heightScale.y = HeightScale(heightScale.y, heightScale.z);
-            //heightScale.x = Random.Range(minBuildingWidth, maxBuildingWidth);
-            //heightScale.z = Random.Range(minBuildingLength, maxBuildingLength);
-            building.transform.localScale = heightScale;
-
-        }
-    }
-
-    
-
-    private int HeightScale(float h, float z)
-    {
-        int buildingHeight = 0;
-
-        float noise = Mathf.PerlinNoise(h * 0.01f, z * 0.01f);
-
-        buildingHeight = Mathf.Clamp(Mathf.RoundToInt(noise * maxBuildingHeight) + Random.Range(minBuildingHeight, maxBuildingHeight), minBuildingHeight, maxBuildingHeight);
-        return buildingHeight;
-    }
-
-    public void RandomColor()
+    public void BuildingColor()
     {
         foreach(GameObject building in allBuildings)
         {
