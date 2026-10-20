@@ -22,9 +22,7 @@ public class ProprietaryAlgorithm : MonoBehaviour
     public int maxBuildingWidth = 5;
     public int minBuildingLength = 1;
     public int maxBuildingLength = 5;
-
-
-
+    
     void Start()
     {
         Regenerate();
@@ -47,7 +45,7 @@ public class ProprietaryAlgorithm : MonoBehaviour
     {
         DeleteAll();
         RandomPlacements();
-        RandomizeBuildingScale();
+        BuildingScales();
         RandomColor();
     }
 
@@ -60,6 +58,7 @@ public class ProprietaryAlgorithm : MonoBehaviour
                 GameObject building = Instantiate(buildingPrefab, transform);
                 float posX = x * Random.Range(buildingSpacingMin, buildingSpacingMax+1);
                 float posZ = z * Random.Range(buildingSpacingMin, buildingSpacingMax + 1);
+                DistanceBuildings();
 
                 building.transform.localPosition = new Vector3(posX, 0, posZ);
                 allBuildings.Add(building);
@@ -68,19 +67,58 @@ public class ProprietaryAlgorithm : MonoBehaviour
         }
     }
 
-    public void RandomizeBuildingScale()
+    private void DistanceBuildings()
+    {
+        if (allBuildings.Count == 0) return;
+        foreach(GameObject building in allBuildings)
+        {
+
+        }
+
+    }
+
+    // scales all building based off of a set of rules
+    public void BuildingScales()
     {
         foreach(GameObject building in allBuildings)
         {
-            float buildingHeight = Random.Range(minBuildingHeight, maxBuildingHeight + 1);
-            float buildingWidth = Random.Range(minBuildingWidth, maxBuildingWidth);
-            float buidlingLength = Random.Range(minBuildingLength, maxBuildingLength);
             Vector3 heightScale = building.transform.localScale;
-            heightScale.y = buildingHeight;
-            heightScale.x = buildingWidth;
-            heightScale.z = buidlingLength;
+            heightScale.y = HeightScale(heightScale.y, heightScale.z);
+            heightScale.x = WidthScale(heightScale.x, heightScale.z);
+            heightScale.z = LengthScale(heightScale.z, heightScale.x);
             building.transform.localScale = heightScale;
         }
+    }
+
+    private int LengthScale(float x, float z)
+    {
+        int buildingLength = 0;
+
+        float noise = Mathf.PerlinNoise(x * 0.01f, z * 0.01f);
+
+        buildingLength = Mathf.Clamp(Mathf.RoundToInt(noise * maxBuildingLength) + Random.Range(minBuildingLength, maxBuildingLength), minBuildingLength, maxBuildingLength);
+        return buildingLength;
+    }
+    private int WidthScale(float x, float z)
+    {
+        int buildingWidth = 0;
+
+        float noise = Mathf.PerlinNoise(x * 0.01f, z * 0.01f);
+
+        buildingWidth = Mathf.Clamp(Mathf.RoundToInt(noise * maxBuildingWidth) + Random.Range(minBuildingWidth, maxBuildingWidth), minBuildingWidth, maxBuildingWidth);
+        return buildingWidth;
+    }
+
+    private int HeightScale(float h, float z)
+    {
+        int buildingHeight = 0;
+
+        float noise = Mathf.PerlinNoise(h * 0.01f, z * 0.01f);
+
+        buildingHeight = Mathf.Clamp(Mathf.RoundToInt(noise * maxBuildingHeight) + Random.Range(minBuildingHeight, maxBuildingHeight), minBuildingHeight, maxBuildingHeight);
+        float centerBias = 1f - (Vector2.Distance(new Vector2(h, z), new Vector2(cityWidth / 2f, cityLength / 2f)) / (cityWidth / 2f));
+        buildingHeight = Mathf.Clamp(Mathf.RoundToInt(buildingHeight * (1f + centerBias * 0.5f)), minBuildingHeight, maxBuildingHeight);
+        return buildingHeight;
     }
 
     public void RandomColor()
