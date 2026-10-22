@@ -570,7 +570,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 1, z: 10}
+  m_LocalScale: {x: 100, y: 1, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1029,14 +1029,18 @@ MonoBehaviour:
   allBuildings: []
   cityWidth: 25
   cityLength: 10
-  buildingSpacingMin: 1
+  buildingsPerBlock: 3
+  buildingSpacingMin: 2
   buildingSpacingMax: 5
-  minBuildingHeight: 10
-  maxBuildingHeight: 50
-  minBuildingWidth: 1
-  maxBuildingWidth: 5
-  minBuildingLength: 1
-  maxBuildingLength: 5
+  minBuildingHeight: 15
+  maxBuildingHeight: 75
+  minBuildingWidth: 3
+  maxBuildingWidth: 6
+  minBuildingLength: 5
+  maxBuildingLength: 10
+  shortBuildingColor: {r: 0.6226415, g: 0, b: 0, a: 1}
+  medBuildingColor: {r: 0.7830189, g: 0.63270307, b: 0.033241354, a: 1}
+  tallBuildingColor: {r: 0, g: 0.030212043, b: 0.3018868, a: 1}
 --- !u!4 &1844597260
 Transform:
   m_ObjectHideFlags: 0
@@ -1046,7 +1050,7 @@ Transform:
   m_GameObject: {fileID: 1844597258}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -11, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

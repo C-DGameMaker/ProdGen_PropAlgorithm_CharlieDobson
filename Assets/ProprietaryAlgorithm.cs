@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.LightTransport;
 using UnityEngine.UIElements;
@@ -14,6 +15,7 @@ public class ProprietaryAlgorithm : MonoBehaviour
     [Header("Generic City Stuff")]
     public int cityWidth = 10;
     public int cityLength = 10;
+    public int buildingsPerBlock = 3;
 
     public int buildingSpacingMin = 1;
     public int buildingSpacingMax = 5;
@@ -29,6 +31,7 @@ public class ProprietaryAlgorithm : MonoBehaviour
     public Color medBuildingColor;
     public Color tallBuildingColor;
 
+
     float cityXValue;
     float cityZValue;
 
@@ -39,25 +42,25 @@ public class ProprietaryAlgorithm : MonoBehaviour
         Regenerate();
     }
 
-    public void DeleteAll()
+    public void Regenerate()
+    {
+        DeleteAllBuildings();
+        BuildingPlacement();
+        BuildingRelativePlacement();
+        BuildingRelativeAttributes();
+
+    }
+
+    public void DeleteAllBuildings()
     {
         if (allBuildings.Count == 0) return;
 
-        foreach(GameObject building in allBuildings)
+        foreach (GameObject building in allBuildings)
         {
             Destroy(building);
         }
 
         allBuildings.Clear();
-
-    }
-
-    public void Regenerate()
-    {
-        DeleteAll();
-        BuildingPlacement();
-        BuildingRelativeAttributes();
-        BuildingRelativePlacement();
     }
 
 
@@ -81,9 +84,19 @@ public class ProprietaryAlgorithm : MonoBehaviour
                 building.tag = "Building";
 
                 cityZValue += maxBuildingLength + Random.Range(buildingSpacingMin, buildingSpacingMax + 1);
+
+                if ((z + 1) % buildingsPerBlock == 0)
+                {
+                    cityZValue += 10f;
+                }
             }
 
             cityXValue += maxBuildingWidth + Random.Range(buildingSpacingMin, buildingSpacingMax + 1);
+
+            if ((x + 1) % buildingsPerBlock == 0)
+            {
+                cityXValue += 10f;
+            }
         }
     }
     public void BuildingRelativeAttributes()
@@ -97,9 +110,9 @@ public class ProprietaryAlgorithm : MonoBehaviour
 
     public void BuildingRelativePlacement()
     {
-        foreach(GameObject building in allBuildings)
+        foreach (GameObject building in allBuildings)
         {
-            Replacement(building);
+            MovingBuildings(building);
         }
     }
 
@@ -108,9 +121,9 @@ public class ProprietaryAlgorithm : MonoBehaviour
     public void PlacingBuilding(GameObject building)
     {
         float buildingPlacementWidth = Random.Range(minBuildingWidth, maxBuildingWidth + 1);
-        float buildingPlacementLength = Random.Range( minBuildingLength, maxBuildingLength + 1);
+        float buildingPlacementLength = Random.Range(minBuildingLength, maxBuildingLength + 1);
 
-        building.transform.localPosition = new Vector3(cityXValue + buildingPlacementWidth / 2f, 0 , cityZValue + buildingPlacementLength / 2f);
+        building.transform.localPosition = new Vector3(cityXValue + buildingPlacementWidth / 2f, 0, cityZValue + buildingPlacementLength / 2f);
     }
 
 
@@ -126,20 +139,56 @@ public class ProprietaryAlgorithm : MonoBehaviour
 
     public void BuildingColor(GameObject building)
     {
-            Renderer render;
+        Renderer render;
 
-            render = building.GetComponent<Renderer>();
+        render = building.GetComponent<Renderer>();
 
-            render.material.color = Random.ColorHSV(0f, 1f, 0.5f, 1f);
-        
+        render.material.color = Random.ColorHSV(0f, 1f, 0.5f, 1f);
+
     }
     #endregion
 
-    #region Phase 2 Resizing n Color
+    #region Phase 2 Moving buildings closer
+
+    public void MovingBuildings(GameObject building)
+    {
+        foreach (GameObject otherBuilding in allBuildings)
+        {
+            if (otherBuilding == building) continue;
+
+            Vector3 difference =
+                building.transform.position - otherBuilding.transform.position;
+
+            float minX = (building.transform.localScale.x + otherBuilding.transform.localScale.x) / 2f + buildingSpacingMin;
+
+            float minZ = (building.transform.localScale.z + otherBuilding.transform.localScale.z) / 2f + buildingSpacingMin;
+
+            if (Mathf.Abs(difference.x) < minX && Mathf.Abs(difference.z) < minZ)
+            {
+                if (minX - Mathf.Abs(difference.x) <
+                    minZ - Mathf.Abs(difference.z))
+                {
+                    float direction = difference.x >= 0 ? 1f : -1f;
+
+                    building.transform.position = new Vector3(otherBuilding.transform.position.x + direction * minX, 0, building.transform.position.z);
+                }
+                else
+                {
+                    float direction = difference.z >= 0 ? 1f : -1f;
+
+                    building.transform.position = new Vector3(building.transform.position.x, 0,otherBuilding.transform.position.z + direction * minZ);
+                }
+            }
+        }
+    }
+
+    #endregion
+
+    #region Phase 3 Resizing n Color
 
     public void BuildingTagAddition(GameObject building)
     {
-        if(building.transform.localScale.y < 30)
+        if (building.transform.localScale.y < 30)
         {
             Renderer render = building.GetComponent<Renderer>();
 
@@ -147,7 +196,7 @@ public class ProprietaryAlgorithm : MonoBehaviour
 
             building.tag = "SmallBuilding";
         }
-        else if(building.transform.localScale.y < 55)
+        else if (building.transform.localScale.y < 55)
         {
             Renderer render = building.GetComponent<Renderer>();
 
@@ -166,11 +215,11 @@ public class ProprietaryAlgorithm : MonoBehaviour
     }
     public void BuildingAttritubeDetection(GameObject building)
     {
-        foreach(GameObject otherBuilding in allBuildings)
+        foreach (GameObject otherBuilding in allBuildings)
         {
             if (otherBuilding == building) continue;
 
-            if(Vector3.Distance(building.transform.position, otherBuilding.transform.position) < 5) continue;
+            if (Vector3.Distance(building.transform.position, otherBuilding.transform.position) <= 25) continue;
 
             float buildingXScale = building.transform.localScale.x;
             float buildingZScale = building.transform.localScale.z;
@@ -178,38 +227,21 @@ public class ProprietaryAlgorithm : MonoBehaviour
             float otherBuildingXScale = otherBuilding.transform.localScale.x;
             float otherBuildingZScale = otherBuilding.transform.localScale.z;
 
-            if(buildingXScale < otherBuildingXScale)
+            if (buildingXScale < otherBuildingXScale)
             {
                 buildingXScale = otherBuildingXScale;
             }
-            if(buildingZScale < otherBuildingZScale)
+            if (buildingZScale < otherBuildingZScale)
             {
                 buildingZScale = otherBuildingZScale;
             }
         }
     }
-    
-    #endregion
 
-    #region Phase 3 Replacing with roads
-
-    public void Replacement(GameObject building)
-    {
-        foreach (GameObject otherBuilding in allBuildings)
-        {
-            if(otherBuilding == building) continue;
-
-            if(Vector3.Distance(building.transform.position, otherBuilding.transform.position) < 50) continue;
-            //else
-            //{
-            //    building.transform.localPosition = new Vector3
-            //        (building.transform.position.x + Random.Range(minBuildingLength, maxBuildingLength + 1), 0, building.transform.position.z + Random.Range(minBuildingLength, maxBuildingLength + 1));
-            //}
-
-            
-        }
-    }
     #endregion
 }
+
+   
+
 
 
